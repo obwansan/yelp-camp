@@ -1,0 +1,15 @@
+<% include partials/header %>
+
+<h1>Create a New Campground</h1>
+
+<%# We use the name attribute inside the route, to grab the data off request.body %>
+<%# Form request is posted to app.post('/campgrounds') route %>
+<form action="/campgrounds" method="POST">
+  <input type="text" name="name" placeholder="name">
+  <input type="text" name="image" placeholder="image url">
+  <button>Submit!</button>
+</form>
+
+<a href="/campgrounds">Go Back</a>
+
+<% include partials/footer %>
