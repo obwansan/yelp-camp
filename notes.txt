@@ -1,0 +1,24 @@
+// SHOW (restful route) - Shows more info about one campground.
+// (NOTE: This kind of 'show' route must come after all other routes. Otherwise any other 
+// route with a query string parameter after /campgrounds/ will be read as '/campgrounds/:id'.
+// Anything after 'campgrounds/' will be read as ':id'.
+// The campground object in the DB already has an ID (automatically assigned by mongoose when 
+// the object (i.e. document) was created). 
+// The 'SHow more' button link href in index.ejs appends this ID to /campgrounds/, so when you click it the SHOW route is hit ('/campgrounds/:id').
+// The href link performs a GET request (http://localhost:3000/campgrounds/5cd8077b100dd70cf3ce08af).
+// Therefore the ID can be pulled off the params object on the request object (req.params.id). Because the ID is a parameter in the query string (http://localhost:3000/campgrounds/5cd8077b100dd70cf3ce08af).
+
+app.get('/campgrounds/:id', function(req, res) {
+  // Find the campground with provided ID
+  Campground.findById(req.params.id, function(err, foundCampground) {
+    if(err) {
+      console.log(err);
+    } else {
+        // Render show template with that campground 
+        res.render('show', {campground:foundCampground});
+    }
+  })
+});
+
+*********************************************************
+
