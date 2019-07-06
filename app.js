@@ -7,8 +7,11 @@ var express    = require('express'),
     seedDB     = require('./seeds.js');
 
 // CONFIG
+// Means you don't have to use .ejs suffix on files
+app.set("view engine", "ejs"); 
 app.use(bodyParser.urlencoded({extended:true}));
-app.set("view engine", "ejs"); // Don't have to use .ejs suffix on files
+// __dirname gets the path to the public directory (changes if the path changes)
+app.use(express.static(__dirname + "/public")); 
 
 // Creates (and connects to) the yelp_camp database inside mongodb 
 mongoose.connect("mongodb://localhost:27017/yelp_camp", { useNewUrlParser: true });
@@ -58,7 +61,7 @@ app.get('/campgrounds/new', function(req, res) {
 
 // SHOW (restful route) - Shows more info about one campground.
 app.get('/campgrounds/:id', function(req, res) {
-  // Find the campground with provided ID
+  // Query the database for the campground using the provided ID
   Campground.findById(req.params.id).populate("comments").exec(function(err, foundCampground) {
     if(err) {
       console.log(err);
