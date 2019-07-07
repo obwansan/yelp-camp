@@ -1,26 +1,40 @@
-var express    = require('express'),
-    app        = express(),
-    bodyParser = require('body-parser'),
-    mongoose   = require('mongoose'),
-    passport   = require('passport'),
+var express         = require('express'),
+    expressSession  = require("express-session"),
+    bodyParser      = require('body-parser'),
+    mongoose        = require('mongoose'),
+    passport        = require('passport'),
     LocalStrategy   = require('passport-local'),
-    Campground = require('./models/campground'),
-    Comment    = require('./models/comment'),
-    User       = require('./models/user'),
-    seedDB     = require('./seeds.js');
+    Campground      = require('./models/campground'),
+    Comment         = require('./models/comment'),
+    User            = require('./models/user'),
+    seedDB          = require('./seeds.js');
 
-// CONFIG
+/****** APP CONFIGURATION ******/
+var app = express();
 // Means you don't have to use .ejs suffix on files
 app.set("view engine", "ejs"); 
 app.use(bodyParser.urlencoded({extended:true}));
 // __dirname gets the path to the public directory (changes if the path changes)
 app.use(express.static(__dirname + "/public")); 
-
 // Creates (and connects to) the yelp_camp database inside mongodb 
 mongoose.connect("mongodb://localhost:27017/yelp_camp", { useNewUrlParser: true });
-
 // Seed the database with campgrounds
 seedDB();
+
+/****** PASSPORT CONFIGURATION ******/
+app.use(expressSession({
+  secret: "Hey lazer lips, your mama was a snow-blower!",
+  resave: false,
+  saveUninitialized: false
+}));
+
+app.use(passport.initialize());
+app.use(passport.session());
+// The authenticate, serializeUser and deserializeUser methods are from passportLocalMongoose.
+passport.use(new LocalStrategy(User.authenticate()));
+passport.serializeUser(User.serializeUser()); 
+passport.deserializeUser(User.deserializeUser()); 
+
 
 app.get('/', function(req, res) {
   res.render('landing')
@@ -111,6 +125,34 @@ app.post('/campgrounds/:id/comments', function(req, res) {
     }
   });
 });
+
+// =============================
+// AUTH ROUTES
+// =============================
+
+// show register form
+app.get("/register", function(req, res) {
+  res.render("register");
+});
+
+// handle sign-up logic
+app.post("/register", function(req, res) {
+  // The User model is like a class. Can instantiate a newUser object from it, 
+  // but also use methods on it directly (like static access in PHP).
+  var newUser = new User({username: req.body.username});
+  // Sign up the user
+  User.register(newUser, req.body.password, function(err, user) {
+    if(err) {
+      console.log(err);
+      return res.render("register");
+    }
+    // Check their username and password, then redirect to /campgrounds page.
+    passport.authenticate("local")(req, res, function() {
+      res.redirect("/campgrounds");
+    })
+  });
+});
+
 
 app.listen(3000, function() {
   console.log('The YelpCamp server has started...');
