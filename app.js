@@ -44,6 +44,14 @@ function isLoggedIn(req, res, next) {
   res.redirect("/login");
 };
 
+// The function is called on every route
+app.use(function(req, res, next) {
+  // This passes req.user to every template.
+  // req.user will contain the username and password if the user is logged in.
+  res.locals.currentUser = req.user;
+  next();
+});
+
 // =============================
 // VIEW/CREATE CAMPGROUNDS ROUTES
 // =============================
@@ -54,11 +62,14 @@ app.get('/', function(req, res) {
 
 // INDEX (restful route) - Display all campgrounds
 app.get('/campgrounds', function(req, res) {
+  console.log(req.user);
   // An empty object as the first parameter means find all items in the collection
   Campground.find({}, function(err, allCampgrounds) {
     if(err) {
       console.log(err);
     } else {
+      // render index.ejs in the campgrounds directory.
+      // req.user is a passport property that holds the user's username and password.
         res.render('campgrounds/index', {campgrounds:allCampgrounds});
     }
   })
@@ -192,8 +203,7 @@ app.post(
 
 // log out route
 app.get("/logout", function(req, res) {
-  // not sure if logout() is a built-in method on the request object or 
-  // if it comes from passport etc.
+  // logout() is a passport method. But how can it be called in the request object?
   req.logout();
   res.redirect("/campgrounds");
 });
