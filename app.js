@@ -33,8 +33,20 @@ app.use(passport.session());
 // The authenticate, serializeUser and deserializeUser methods are from passportLocalMongoose.
 passport.use(new LocalStrategy(User.authenticate()));
 passport.serializeUser(User.serializeUser()); 
-passport.deserializeUser(User.deserializeUser()); 
+passport.deserializeUser(User.deserializeUser());
 
+
+/****** MIDDLEWARE ******/
+function isLoggedIn(req, res, next) {
+  if(req.isAuthenticated()) {
+    return next();
+  }
+  res.redirect("/login");
+};
+
+// =============================
+// VIEW/CREATE CAMPGROUNDS ROUTES
+// =============================
 
 app.get('/', function(req, res) {
   res.render('landing')
@@ -94,7 +106,10 @@ app.get('/campgrounds/:id', function(req, res) {
 // COMMENTS ROUTES
 // =============================
 
-app.get('/campgrounds/:id/comments/new', function(req, res) {
+// Page where you can add a comment to a post
+// isLoggedIn middleware: the 'next' callback runs if the user is logged in,
+// otherwise user is redirected to the login page.
+app.get('/campgrounds/:id/comments/new', isLoggedIn, function(req, res) {
   // find campground by ID
   Campground.findById(req.params.id, function(err, campground) {
     if(err) {
@@ -105,7 +120,9 @@ app.get('/campgrounds/:id/comments/new', function(req, res) {
   })
 })
 
-app.post('/campgrounds/:id/comments', function(req, res) {
+// Add isLoggedIn middleware to this route to prevent a hacker posting data
+// to this route/URL using something like Postman.
+app.post('/campgrounds/:id/comments', isLoggedIn, function(req, res) {
   // look up campground using ID
   Campground.findById(req.params.id, function(err, campground) {
     if(err) {
@@ -172,6 +189,15 @@ app.post(
   }),
   function(req, res) {
 });
+
+// log out route
+app.get("/logout", function(req, res) {
+  // not sure if logout() is a built-in method on the request object or 
+  // if it comes from passport etc.
+  req.logout();
+  res.redirect("/campgrounds");
+});
+
 
 
 app.listen(3000, function() {
