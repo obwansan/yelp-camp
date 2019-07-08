@@ -22,3 +22,11 @@ app.get('/campgrounds/:id', function(req, res) {
 
 *********************************************************
 
+passport.js and req.user
+
+(1) req.user is created by passport whenever a user logs in. Well, req already exists each time a request is made from the client (front-end) to the server (back-end) then passport "hijacks" the req object and adds the user object to it (either undefined (user not logged in), or pointing to the logged in user)
+req.body.user on the other hand would be representative of data coming from a form during a POST request where the form has inputs with name values such as name="user[username]"
+
+(2) res.locals comes from express, see more here
+
+(3) yes, it will get run every time a request is made, same for other app.use() instances that you mentioned. And yes, they are all middleware, much of what you see in express will be acting as middleware
