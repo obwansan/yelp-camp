@@ -20,26 +20,36 @@ router.get('/', function(req, res) {
 });
 
 // CREATE (restful route) - Add new campground to the DB
+// '/' is actually '/campgrounds' (see app.use() in app.js)
 router.post('/', function(req, res) {
    // Get data from form request and add to campgrounds array.
    // The req.body properties correspond to the form input field attributes.
-  var name          = req.body.name,
-      image         = req.body.image,
-      desc          = req.body.description,
-      newCampground = {name:name, image:image, description: desc};
-
+  var name = req.body.name;
+  var img = req.body.image;
+  var desc = req.body.description;
+  var author = {
+    id: req.user._id,
+    username: req.user.username
+  }
+  var newCampground = {
+    name: name, 
+    image: img, 
+    description: desc,
+    author: author
+  };
   Campground.create(newCampground, function(err, newlyCreated) {
     if(err) {
       console.log(err);
     } else {
       // Redirect back to campgrounds page
+      console.log(newlyCreated);
       res.redirect('/campgrounds'); // redirects to the get route
     }
   })
 });
 
 // NEW (restful route) - Displays form to create new campground
-router.get('/new', function(req, res) {
+router.get('/new', isLoggedIn, function(req, res) {
   res.render('campgrounds/new');
 });
 
@@ -55,6 +65,14 @@ router.get('/:id', function(req, res) {
     }
   });
 });
+
+/****** MIDDLEWARE ******/
+function isLoggedIn(req, res, next) {
+  if(req.isAuthenticated()) {
+    return next();
+  }
+  res.redirect("/login");
+};
 
 // Then we export the router object with all the routes on it.
 module.exports = router;
