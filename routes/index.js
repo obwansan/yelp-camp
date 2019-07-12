@@ -3,7 +3,7 @@ var express = require('express');
 // Then we add all out routes to the router instance (e.g. router.get())
 var router = express.Router();
 var passport = require("passport");
-var user = require("../models/user");
+var User = require("../models/user");
 
 // root route
 router.get('/', function(req, res) {

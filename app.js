@@ -8,12 +8,12 @@ var express         = require('express'),
 var Campground      = require('./models/campground'),
     Comment         = require('./models/comment'),
     User            = require('./models/user'),
-    seedDB          = require('./seeds.js');
+    seedDB          = require('./seeds');
 
 // requiring routes
 var commentRoutes     = require("./routes/comments"),
     campgroundRoutes  = require("./routes/campgrounds"),
-    authRoutes        = require("./routes/index");
+    indexRoutes        = require("./routes/index");
 
 /****** APP CONFIGURATION ******/
 var app = express();
@@ -24,8 +24,8 @@ app.use(bodyParser.urlencoded({extended:true}));
 app.use(express.static(__dirname + "/public")); 
 // Creates (and connects to) the yelp_camp database inside mongodb 
 mongoose.connect("mongodb://localhost:27017/yelp_camp", { useNewUrlParser: true });
-// Seed the database with campgrounds
-seedDB();
+
+// seedDB();  // Seed the database with campgrounds
 
 /****** PASSPORT CONFIGURATION ******/
 app.use(expressSession({
@@ -50,11 +50,13 @@ app.use(function(req, res, next) {
 });
 
 // Tells the app to use the routes required above.
-app.use(authRoutes);
-// Appends "/campgrounds/:id/comments" to all comment routes (DRYs the code)
-app.use("/campgrounds/:id/comments", commentRoutes);
+app.use("/", indexRoutes);
 // Appends "/campgrounds" to all campground routes (DRYs the code)
 app.use("/campgrounds", campgroundRoutes);
+// Appends "/campgrounds/:id/comments" to all comment routes (DRYs the code)
+// Have to pass {mergeParams: true} to the express router in comments.js in order 
+// for req.params.id to be accessible on the comments/new route (not sure why)
+app.use("/campgrounds/:id/comments", commentRoutes);
 
 app.listen(3000, function() {
   console.log('The YelpCamp server has started...');

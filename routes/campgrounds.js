@@ -7,7 +7,6 @@ var Campground = require('../models/campground');
 
 // INDEX (restful route) - Display all campgrounds
 router.get('/', function(req, res) {
-  console.log(req.user);
   // An empty object as the first parameter means find all items in the collection
   Campground.find({}, function(err, allCampgrounds) {
     if(err) {
@@ -51,7 +50,6 @@ router.get('/:id', function(req, res) {
     if(err) {
       console.log(err);
     } else {
-        console.log(foundCampground);
         // Render show template with that campground 
         res.render('campgrounds/show', {campground: foundCampground});
     }
