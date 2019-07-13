@@ -66,6 +66,40 @@ router.get('/:id', function(req, res) {
   });
 });
 
+// EDIT CAMPGROUND ROUTE (renders the form)
+router.get("/:id/edit", function(req, res) {
+  Campground.findById(req.params.id, function(err, foundCampground) {
+    if(err) {
+      res.redirect("/campgrounds");
+    } else {
+      res.render("campgrounds/edit", {campground: foundCampground});
+    }
+  });
+});
+
+// UPDATE CAMPGROUND ROUTE (route the form submits to)
+router.put("/:id", function(req, res) {
+  // find and update the correct campground
+  Campground.findByIdAndUpdate(req.params.id, req.body.campground, function(err, updatedCampground) {
+    if(err) {
+      res.redirect("/campgrounds");
+    } else {
+      // redirect somewhere (usually the show page i.e. the updated campground)
+      res.redirect("/campgrounds/" + req.params.id);
+    }
+  });
+});
+
+
+/*
+    if(err) {
+      console.log('Campground update didn\'t work');
+    } else {
+      console.log("req.params " + req.params);
+      console.log("foundCampground " + foundCampground);
+*/
+
+
 /****** MIDDLEWARE ******/
 function isLoggedIn(req, res, next) {
   if(req.isAuthenticated()) {
