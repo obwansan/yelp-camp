@@ -22,7 +22,16 @@
           <p>
             <em>Submitted By <%= campground.author.username%></em>
           </p>
-          <a class="btn btn-warning" href="/campgrounds/<%= campground._id %>/edit">Edit</a>
+          <!--- req.user is assigned to res.locals.currentUser in app.js --->
+          <% if(currentUser && campground.author.id.equals(currentUser._id)){ %>
+            <a class="btn btn-warning" href="/campgrounds/<%= campground._id %>/edit">Edit</a>
+            <%# When you click the button the form does a POST request to the router.delete() route
+            where the functions are run to delete the campground object/document with the ID sent
+            in the request (campground._id is accessible from req.params.id) %>
+            <form id="delete-form" action="/campgrounds/<%= campground._id %>/?_method=DELETE" method="POST">
+              <button class="btn btn-danger">Delete</button>
+            </form>
+          <% } %>
         </div>
       </div>
       <div class="well">

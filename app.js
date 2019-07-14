@@ -16,25 +16,25 @@ var commentRoutes     = require("./routes/comments"),
     campgroundRoutes  = require("./routes/campgrounds"),
     indexRoutes        = require("./routes/index");
 
-/****** APP CONFIGURATION ******/
-var app = express();
-// Means you don't have to use .ejs suffix on files
-app.set("view engine", "ejs"); 
-
-app.use(bodyParser.urlencoded({extended:true}));
-// __dirname gets the path to the public directory (changes if the path changes)
-
-app.use(express.static(__dirname + "/public")); 
-
-// Lets you use HTTP verbs such as PUT or DELETE in places where the client (i.e. older browsers) doesn't support it.
-app.use(methodOverride("_method"));
+/****** DATABASE SETUP ******/
 
 // Creates (and connects to) the yelp_camp database inside mongodb 
 mongoose.connect("mongodb://localhost:27017/yelp_camp", { useNewUrlParser: true });
-
 // seedDB();  // Seed the database with campgrounds
 
+/****** APP CONFIGURATION ******/
+
+var app = express();
+// Means you don't have to use .ejs suffix on files
+app.set("view engine", "ejs"); 
+app.use(bodyParser.urlencoded({extended:true}));
+// __dirname gets the path to the public directory (changes if the path changes)
+app.use(express.static(__dirname + "/public")); 
+// Lets you use HTTP verbs such as PUT or DELETE in places where the client (i.e. older browsers) doesn't support it.
+app.use(methodOverride("_method"));
+
 /****** PASSPORT CONFIGURATION ******/
+
 app.use(expressSession({
   secret: "Hey lazer lips, your mama was a snow-blower!",
   resave: false,
@@ -48,10 +48,12 @@ passport.use(new LocalStrategy(User.authenticate()));
 passport.serializeUser(User.serializeUser()); 
 passport.deserializeUser(User.deserializeUser());
 
+/****** MIDDLEWARE ******/
+
 // The function is called (as middleware) on every route
 app.use(function(req, res, next) {
-  // This passes req.user to every template.
-  // req.user will contain the username and password if the user is logged in.
+  // This makes req.user available to every template.
+  // req.user will contain the username, password and id if the user is logged in.
   res.locals.currentUser = req.user;
   next();
 });
@@ -65,6 +67,9 @@ app.use("/campgrounds", campgroundRoutes);
 // for req.params.id to be accessible on the comments/new route (not sure why)
 app.use("/campgrounds/:id/comments", commentRoutes);
 
+/****** SERVER ******/
+
+// Listens on port 3000. The callback runs when the server is started on port 3000.
 app.listen(3000, function() {
   console.log('The YelpCamp server has started...');
 })

@@ -30,13 +30,14 @@ router.post('/', function(req, res) {
   var author = {
     id: req.user._id,
     username: req.user.username
-  }
+  };
   var newCampground = {
     name: name, 
     image: img, 
     description: desc,
     author: author
   };
+
   Campground.create(newCampground, function(err, newlyCreated) {
     if(err) {
       console.log(err);
@@ -67,13 +68,9 @@ router.get('/:id', function(req, res) {
 });
 
 // EDIT CAMPGROUND ROUTE (renders the form)
-router.get("/:id/edit", function(req, res) {
+router.get("/:id/edit", checkCampgroundOwnership, function(req, res) {
   Campground.findById(req.params.id, function(err, foundCampground) {
-    if(err) {
-      res.redirect("/campgrounds");
-    } else {
-      res.render("campgrounds/edit", {campground: foundCampground});
-    }
+    res.render("campgrounds/edit", {campground: foundCampground});
   });
 });
 
@@ -90,14 +87,16 @@ router.put("/:id", function(req, res) {
   });
 });
 
-
-/*
+// DESTROY CAMPGROUND ROUTE
+router.delete("/:id", function(req, res) {
+  Campground.findByIdAndRemove(req.params.id, function(err) {
     if(err) {
-      console.log('Campground update didn\'t work');
+      res.redirect("/campgrounds");
     } else {
-      console.log("req.params " + req.params);
-      console.log("foundCampground " + foundCampground);
-*/
+      res.redirect("/campgrounds");
+    }
+  })
+});
 
 
 /****** MIDDLEWARE ******/
@@ -106,6 +105,31 @@ function isLoggedIn(req, res, next) {
     return next();
   }
   res.redirect("/login");
+};
+
+function checkCampgroundOwnership(req, res, next) {
+    // is user logged in?
+    if(req.isAuthenticated()) {
+      Campground.findById(req.params.id, function(err, foundCampground) {
+        if(err) {
+            res.redirect("back");
+        } else {
+            // does user own the campground?
+            /* Have to use .equals rather than == because foundCampground.author.id is an object
+            with a weird mongoose schema type, but req.user._id is a string. The author id is the 
+            id of the logged in user who created the campground document and is put on the document when it's created. The user id is the id of the currently logged in user (must stay the same for this 
+            equality check to work, but not explicitly declared on the User model schema). */
+            if(foundCampground.author.id.equals(req.user._id)) {
+                next();
+            } else {
+                res.redirect("back");
+            }
+          }
+      });
+    } else {
+      // redirects back to previous page
+      res.redirect('back');
+    }
 };
 
 // Then we export the router object with all the routes on it.
