@@ -22,7 +22,7 @@ router.get('/new', isLoggedIn, function(req, res) {
   })
 })
 
-// Comment Create (entering in the comments form)
+// COMMENT CREATE (entering in the comments form)
 // Add isLoggedIn middleware to this route to prevent a hacker posting data to this route/URL 
 // using something like Postman.
 router.post('/', isLoggedIn, function(req, res) {
@@ -50,6 +50,42 @@ router.post('/', isLoggedIn, function(req, res) {
           res.redirect('/campgrounds/' + campground._id);
         }
       });
+    }
+  });
+});
+
+// COMMENT EDIT
+// Have to prefix the id query string parameter with a colon for it to work.
+// But the name of the id query string parameter can be anything.
+// The name of the id query string parameter - :comment_id - is the name of 
+// the property stored on req.params - comment_id.
+// The full route is /campgrounds/:id/comments/:comment_id/edit
+router.get('/:comment_id/edit', function(req, res) {
+  Comment.findById(req.params.comment_id , function(err, foundComment) {
+    if(err) {
+        res.redirect('back');
+    } else {
+        // Must not have / infront of comments/edit because it denotes 
+        // the root, i.e. localhost:3000
+        // req.params.id matches the id in /campgrounds/:id/comments (see app.js)
+        res.render('comments/edit', {
+          campground_id: req.params.id, 
+          comment: foundComment
+        });
+    }
+  });
+});
+
+// UPDATE COMMENT ROUTE (route the form submits to)
+router.put('/:comment_id', function(req, res) {
+  // Find comment in database by it's id and update it with the data from the form
+  // stored on req.body.comment
+  Comment.findByIdAndUpdate(req.params.comment_id, req.body.comment, function(err, updatedComment) {
+    if(err) {
+      res.redirect("back");
+    } else {
+      // redirect somewhere (usually the show page i.e. the campground that has the comment)
+      res.redirect("/campgrounds/" + req.params.id);
     }
   });
 });

@@ -58,13 +58,11 @@ app.use(function(req, res, next) {
   next();
 });
 
-// Tells the app to use the routes required above.
+// Tells the app to use the routes required in above.
 app.use("/", indexRoutes);
 // Appends "/campgrounds" to all campground routes (DRYs the code)
 app.use("/campgrounds", campgroundRoutes);
 // Appends "/campgrounds/:id/comments" to all comment routes (DRYs the code)
-// Have to pass {mergeParams: true} to the express router in comments.js in order 
-// for req.params.id to be accessible on the comments/new route (not sure why)
 app.use("/campgrounds/:id/comments", commentRoutes);
 
 /****** SERVER ******/
