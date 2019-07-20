@@ -5,7 +5,10 @@ var router = express.Router();
 
 var Campground = require('../models/campground');
 
-// INDEX (restful route) - Display all campgrounds
+// Don't need to include the file name in the path if it's called index
+var middleware = require('../middleware');
+
+// INDEX RESTful Route - Display all campgrounds
 router.get('/', function(req, res) {
   // An empty object as the first parameter means find all items in the collection
   Campground.find({}, function(err, allCampgrounds) {
@@ -19,42 +22,7 @@ router.get('/', function(req, res) {
   })
 });
 
-// CREATE (restful route) - Add new campground to the DB
-// '/' is actually '/campgrounds' (see app.use() in app.js)
-router.post('/', function(req, res) {
-   // Get data from form request and add to campgrounds array.
-   // The req.body properties correspond to the form input field attributes.
-  var name = req.body.name;
-  var img = req.body.image;
-  var desc = req.body.description;
-  var author = {
-    id: req.user._id,
-    username: req.user.username
-  };
-  var newCampground = {
-    name: name, 
-    image: img, 
-    description: desc,
-    author: author
-  };
-
-  Campground.create(newCampground, function(err, newlyCreated) {
-    if(err) {
-      console.log(err);
-    } else {
-      // Redirect back to campgrounds page
-      console.log(newlyCreated);
-      res.redirect('/campgrounds'); // redirects to the get route
-    }
-  })
-});
-
-// NEW (restful route) - Displays form to create new campground
-router.get('/new', isLoggedIn, function(req, res) {
-  res.render('campgrounds/new');
-});
-
-// SHOW (restful route) - Shows more info about one campground.
+// SHOW RESTful Route - Shows more info about one campground.
 router.get('/:id', function(req, res) {
   // Query the database for the campground using the provided ID
   Campground.findById(req.params.id).populate("comments").exec(function(err, foundCampground) {
@@ -67,15 +35,17 @@ router.get('/:id', function(req, res) {
   });
 });
 
-// EDIT CAMPGROUND ROUTE (renders the form)
-router.get("/:id/edit", checkCampgroundOwnership, function(req, res) {
+// EDIT RESTful Route - Display the campground edit form
+// Can't edit a campground unless you created it (own it)
+router.get("/:id/edit", middleware.checkCampgroundOwnership, function(req, res) {
   Campground.findById(req.params.id, function(err, foundCampground) {
     res.render("campgrounds/edit", {campground: foundCampground});
   });
 });
 
-// UPDATE CAMPGROUND ROUTE (route the form submits to)
-router.put("/:id", function(req, res) {
+// UPDATE RESTful Route - Route that the edit form submits to
+// Can't update a campground unless you created it (own it)
+router.put("/:id", middleware.checkCampgroundOwnership, function(req, res) {
   // find and update the correct campground
   Campground.findByIdAndUpdate(req.params.id, req.body.campground, function(err, updatedCampground) {
     if(err) {
@@ -87,8 +57,9 @@ router.put("/:id", function(req, res) {
   });
 });
 
-// DESTROY CAMPGROUND ROUTE
-router.delete("/:id", function(req, res) {
+// DESTROY RESTful Route
+// Can't delete a campground unless you created it (own it)
+router.delete("/:id", middleware.checkCampgroundOwnership, function(req, res) {
   Campground.findByIdAndRemove(req.params.id, function(err) {
     if(err) {
       res.redirect("/campgrounds");
@@ -98,41 +69,42 @@ router.delete("/:id", function(req, res) {
   })
 });
 
+// NEW RESTful Route - Displays form to create new campground when you click Add New Campground
+// (Can't create new campground unless you're logged in)
+router.get('/new', middleware.isLoggedIn, function(req, res) {
+  res.render('campgrounds/new');
+});
 
-/****** MIDDLEWARE ******/
-function isLoggedIn(req, res, next) {
-  if(req.isAuthenticated()) {
-    return next();
-  }
-  res.redirect("/login");
-};
+// CREATE Restful Route - Create new campground from form data and add to the DB
+// '/' is actually '/campgrounds' (see app.use() in app.js)
+// (Can't create new campground unless you're logged in)
+router.post('/', middleware.isLoggedIn, function(req, res) {
+  // Get data from form request and add to campgrounds array.
+  // The req.body properties correspond to the form input field attributes.
+ var name = req.body.name;
+ var img = req.body.image;
+ var desc = req.body.description;
+ var author = {
+   id: req.user._id,
+   username: req.user.username
+ };
+ var newCampground = {
+   name: name, 
+   image: img, 
+   description: desc,
+   author: author
+ };
 
-function checkCampgroundOwnership(req, res, next) {
-    // is user logged in?
-    if(req.isAuthenticated()) {
-      Campground.findById(req.params.id, function(err, foundCampground) {
-        if(err) {
-            res.redirect("back");
-        } else {
-            // does user own the campground?
-            /* Have to use .equals rather than == because foundCampground.author.id is an object
-            with a weird mongoose schema type, but req.user._id is a string. The author id is the 
-            id of the user who created the campground document and is put on the document 
-            when it's created. The user id is the id of the currently logged in user (the id must stay the 
-            same for this equality check to work, but not sure how to check as it's not explicitly declared 
-            on the User model schema). */
-            if(foundCampground.author.id.equals(req.user._id)) {
-                next();
-            } else {
-                res.redirect("back");
-            }
-          }
-      });
-    } else {
-      // redirects back to previous page
-      res.redirect('back');
-    }
-};
+ Campground.create(newCampground, function(err, newlyCreated) {
+   if(err) {
+     console.log(err);
+   } else {
+     // Redirect back to campgrounds page
+     console.log(newlyCreated);
+     res.redirect('/campgrounds'); // redirects to the get route
+   }
+ })
+});
 
 // Then we export the router object with all the routes on it.
 module.exports = router;
