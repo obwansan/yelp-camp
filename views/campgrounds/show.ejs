@@ -28,7 +28,8 @@
             <%# When you click the button the form does a POST request to the router.delete() route
             where the functions are run to delete the campground object/document with the ID sent
             in the request (campground._id is accessible from req.params.id) %>
-            <form id="delete-form" action="/campgrounds/<%= campground._id %>/?_method=DELETE" method="POST">
+            <!--- Can only do a post request from a form. Can only do a get request from an anchor tag. --->
+            <form class="delete-form" action="/campgrounds/<%= campground._id %>/?_method=DELETE" method="POST">
               <button class="btn btn-danger">Delete</button>
             </form>
           <% } %>
@@ -45,7 +46,11 @@
               <strong><%= comment.author.username %></strong>
               <span class="pull-right">10 days ago</span>
               <p><%= comment.text %></p>
-              <a class="btn btn-xs btn-warning" href="/campgrounds/<%= campground._id %>/comments/<%= comment._id %>/edit">Edit</a>  
+              <a class="btn btn-xs btn-warning" href="/campgrounds/<%= campground._id %>/comments/<%= comment._id %>/edit">Edit</a>
+              <!--- Can only do a post request from a form. Can only do a get request from an anchor tag. --->
+              <form class="delete-form" action="/campgrounds/<%= campground._id %>/comments/<%= comment._id %>/?_method=DELETE %>" method="POST">
+                <input type="submit" class="btn btn-xs btn-danger" value="Delete"></input>
+              </form>
             </div>
           </div>
         <% }) %>

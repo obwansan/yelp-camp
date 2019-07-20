@@ -54,7 +54,7 @@ router.post('/', isLoggedIn, function(req, res) {
   });
 });
 
-// COMMENT EDIT
+// COMMENT EDIT ROUTE (route hit when you click the edit button)
 // Have to prefix the id query string parameter with a colon for it to work.
 // But the name of the id query string parameter can be anything.
 // The name of the id query string parameter - :comment_id - is the name of 
@@ -76,7 +76,7 @@ router.get('/:comment_id/edit', function(req, res) {
   });
 });
 
-// UPDATE COMMENT ROUTE (route the form submits to)
+// COMMENT UPDATE ROUTE (route the form submits to when you click submit)
 router.put('/:comment_id', function(req, res) {
   // Find comment in database by it's id and update it with the data from the form
   // stored on req.body.comment
@@ -88,6 +88,17 @@ router.put('/:comment_id', function(req, res) {
       res.redirect("/campgrounds/" + req.params.id);
     }
   });
+});
+
+// COMMENT DESTROY ROUTE (route hit when you click the delete button)
+router.delete('/:comment_id', function(req, res) {
+  Comment.findByIdAndRemove(req.params.comment_id, function(err) {
+    if(err) {
+      res.redirect('back');
+    } else {
+      res.redirect('/campgrounds/' + req.params.id);
+    }
+})
 });
 
 /****** MIDDLEWARE ******/
