@@ -20,6 +20,9 @@ var commentRoutes     = require("./routes/comments"),
 
 // Creates (and connects to) the yelp_camp database inside mongodb 
 mongoose.connect("mongodb://localhost:27017/yelp_camp", { useNewUrlParser: true });
+// Make Mongoose use MongoDB driver's findOneAndUpdate() function using the useFindAndModify global option.
+mongoose.set('useFindAndModify', false);
+
 // seedDB();  // Seed the database with campgrounds
 
 /****** APP CONFIGURATION ******/
@@ -50,10 +53,10 @@ passport.deserializeUser(User.deserializeUser());
 
 /****** MIDDLEWARE ******/
 
-// The function is called (as middleware) on every route
+// app.use() automagically calls the function as middleware on every route
 app.use(function(req, res, next) {
-  // This makes req.user available to every template.
-  // req.user will contain the username, password and id if the user is logged in.
+  // This makes req.user available to every template in the currentUser variable.
+  // req.user comes from passport.js and will contain the username, password and id if the user is logged in.
   res.locals.currentUser = req.user;
   next();
 });

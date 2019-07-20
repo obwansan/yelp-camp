@@ -117,8 +117,10 @@ function checkCampgroundOwnership(req, res, next) {
             // does user own the campground?
             /* Have to use .equals rather than == because foundCampground.author.id is an object
             with a weird mongoose schema type, but req.user._id is a string. The author id is the 
-            id of the logged in user who created the campground document and is put on the document when it's created. The user id is the id of the currently logged in user (must stay the same for this 
-            equality check to work, but not explicitly declared on the User model schema). */
+            id of the user who created the campground document and is put on the document 
+            when it's created. The user id is the id of the currently logged in user (the id must stay the 
+            same for this equality check to work, but not sure how to check as it's not explicitly declared 
+            on the User model schema). */
             if(foundCampground.author.id.equals(req.user._id)) {
                 next();
             } else {

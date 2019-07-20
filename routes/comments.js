@@ -60,7 +60,7 @@ router.post('/', isLoggedIn, function(req, res) {
 // The name of the id query string parameter - :comment_id - is the name of 
 // the property stored on req.params - comment_id.
 // The full route is /campgrounds/:id/comments/:comment_id/edit
-router.get('/:comment_id/edit', function(req, res) {
+router.get('/:comment_id/edit', checkCommentOwnership, function(req, res) {
   Comment.findById(req.params.comment_id , function(err, foundComment) {
     if(err) {
         res.redirect('back');
@@ -91,7 +91,7 @@ router.put('/:comment_id', function(req, res) {
 });
 
 // COMMENT DESTROY ROUTE (route hit when you click the delete button)
-router.delete('/:comment_id', function(req, res) {
+router.delete('/:comment_id', checkCommentOwnership, function(req, res) {
   Comment.findByIdAndRemove(req.params.comment_id, function(err) {
     if(err) {
       res.redirect('back');
@@ -107,6 +107,33 @@ function isLoggedIn(req, res, next) {
     return next();
   }
   res.redirect("/login");
+};
+
+function checkCommentOwnership(req, res, next) {
+  // is user logged in?
+  if(req.isAuthenticated()) {
+    Comment.findById(req.params.comment_id, function(err, foundComment) {
+      if(err) {
+          res.redirect("back");
+      } else {
+          // does user own the comment?
+          /* Have to use .equals rather than == because foundComment.author.id is an object
+          with a weird mongoose schema type, but req.user._id is a string. The author id is the 
+          id of the user who created the comment document and is put on the document 
+          when it's created. The user id is the id of the currently logged in user (the id must stay the 
+          same for this equality check to work, but not sure how to check as it's not explicitly declared 
+          on the User model schema). */
+          if(foundComment.author.id.equals(req.user._id)) {
+              next();
+          } else {
+              res.redirect("back");
+          }
+        }
+    });
+  } else {
+    // redirects back to previous page
+    res.redirect('back');
+  }
 };
 
 // Then we export the router object with all the routes on it.

@@ -46,11 +46,18 @@
               <strong><%= comment.author.username %></strong>
               <span class="pull-right">10 days ago</span>
               <p><%= comment.text %></p>
+              <!--- req.user is assigned to res.locals.currentUser in app.js --->
+              <!--- If user is logged in and the author id of the comment matches the id of the current user, 
+              show the edit and delete buttons for that comment.  --->
+              <!--- If you don't check if currentUser is true, the if statement will throw and error if 
+              the user isn't logged in because currentUser will be null/undefined. --->
+              <% if(currentUser && comment.author.id.equals(currentUser._id)){ %>
               <a class="btn btn-xs btn-warning" href="/campgrounds/<%= campground._id %>/comments/<%= comment._id %>/edit">Edit</a>
               <!--- Can only do a post request from a form. Can only do a get request from an anchor tag. --->
               <form class="delete-form" action="/campgrounds/<%= campground._id %>/comments/<%= comment._id %>/?_method=DELETE %>" method="POST">
                 <input type="submit" class="btn btn-xs btn-danger" value="Delete"></input>
               </form>
+              <% } %>
             </div>
           </div>
         <% }) %>
