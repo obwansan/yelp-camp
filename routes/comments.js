@@ -7,9 +7,10 @@ var router = express.Router({ mergeParams: true });
 
 var Campground = require('../models/campground');
 var Comment = require('../models/comment');
+var middleware = require("../middleware");
 
 // Comments new
-router.get('/new', isLoggedIn, function (req, res) {
+router.get('/new', middleware.isLoggedIn, function (req, res) {
   // Without var router = express.Router({mergeparams: true}); this log returns an empty object.
   console.log('req.params: ' + JSON.stringify(req.params));
   // find campground by ID
@@ -25,7 +26,7 @@ router.get('/new', isLoggedIn, function (req, res) {
 // Comment Create (entering in the comments form)
 // Add isLoggedIn middleware to this route to prevent a hacker posting data to this route/URL
 // using something like Postman.
-router.post('/', isLoggedIn, function (req, res) {
+router.post('/', middleware.isLoggedIn, function (req, res) {
   // look up campground using ID
   Campground.findById(req.params.id, function (err, campground) {
     if (err) {
@@ -56,35 +57,57 @@ router.post('/', isLoggedIn, function (req, res) {
   });
 });
 
+
+// COMMENT EDIT ROUTE
 // Have to prefix the id query string parameter with a colon for it to work.
 // But the name of the id query string parameter can be anything.
 // But the name of the id query string parameter (:comment_id) is the name of
 // the property stored on req.params (comment_id) for the id, i.e.
 // req.params.comment_id matches :comment_id
 // The full route is /campgrounds/:id/comments/:comment_id/edit
-router.get('/:comment_id/edit', function (req, res) {
-  Comment.findById(req.params.comment_id, function (err, comment) {
+router.get("/:comment_id/edit", middleware.checkCommentOwnership, function (req, res) {
+  Comment.findById(req.params.comment_id, function (err, foundComment) {
     if (err) {
-      console.log(err);
+      res.redirect("back");
     } else {
-      // Must not have / infront of comments/edit because it denotes
-      // the root, i.e. localhost:3000
+      // Must not have / infront of comments/edit because it denotes the root, i.e. localhost:3000
       // req.params.id matches the id in /campgrounds/:id/comments (see app.js)
-      res.render('comments/edit', {
-        campground_id: req.params.id,
-        comment: comment
-      });
+      res.render("comments/edit", { campground_id: req.params.id, comment: foundComment });
+    }
+  });
+});
+
+// COMMENT UPDATE
+router.put("/:comment_id", middleware.checkCommentOwnership, function (req, res) {
+  Comment.findByIdAndUpdate(req.params.comment_id, req.body.comment, function (err, updatedComment) {
+    if (err) {
+      res.redirect("back");
+    } else {
+      res.redirect("/campgrounds/" + req.params.id);
+    }
+  });
+});
+
+// COMMENT DESTROY ROUTE
+router.delete("/:comment_id", middleware.checkCommentOwnership, function (req, res) {
+  //findByIdAndRemove
+  Comment.findByIdAndRemove(req.params.comment_id, function (err) {
+    if (err) {
+      res.redirect("back");
+    } else {
+      req.flash("success", "Comment deleted");
+      res.redirect("/campgrounds/" + req.params.id);
     }
   });
 });
 
 /****** MIDDLEWARE ******/
-function isLoggedIn(req, res, next) {
-  if (req.isAuthenticated()) {
-    return next();
-  }
-  res.redirect('/login');
-}
+// function isLoggedIn(req, res, next) {
+//   if (req.isAuthenticated()) {
+//     return next();
+//   }
+//   res.redirect('/login');
+// }
 
 // Then we export the router object with all the routes on it.
 module.exports = router;
