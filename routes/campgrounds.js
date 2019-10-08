@@ -42,7 +42,8 @@ router.get('/:id', function (req, res) {
       if (err) {
         console.log(err);
       } else {
-        // Render show template with that campground
+        // Render show.ejs, passing in the foundCampground object so can access
+        // the campground image, description, price etc in show.ejs
         res.render('campgrounds/show', { campground: foundCampground });
       }
     });
@@ -90,6 +91,7 @@ router.post('/', middleware.isLoggedIn, function (req, res) {
   // The req.body properties correspond to the form input field attributes.
   var name = req.body.name;
   var img = req.body.image;
+  var price = req.body.price;
   var desc = req.body.description;
   var author = {
     id: req.user._id,
@@ -98,6 +100,7 @@ router.post('/', middleware.isLoggedIn, function (req, res) {
   var newCampground = {
     name: name,
     image: img,
+    price: price,
     description: desc,
     author: author
   };
