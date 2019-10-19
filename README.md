@@ -1,3 +1,5 @@
+# MongoDB
+
 ## Starting up mondb processes
 
 ### mongod
@@ -19,3 +21,10 @@ To open an instance of the mongo shell, enter the command `mongo` in a new tab.
 
 ## Starting up the server
 Run `node app.js` or `nodemon` (if you've installed it).
+
+# Heroku
+
+* Email: kob123@hotmail.co.uk
+* Password: yC22$Qdl%WZD
+* Yelp Camp heroku app: https://warm-reaches-48982.herokuapp.com/ | https://git.heroku.com/warm-reaches-48982.git
+* Have to add `"start": "node app.js"` to scripts in package.json
