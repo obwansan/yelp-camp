@@ -27,7 +27,7 @@ var commentRoutes = require('./routes/comments'),
 // });
 
 /*** Production database ***/
-mongoose.connect('mongodb+srv://bobs:bmubobs17@cluster0-yeyzg.mongodb.net/test?retryWrites=true&w=majority', {
+mongoose.connect('mongodb+srv://bobs:bmubobs17@cluster0-yeyzg.mongodb.net/YelpCamp?retryWrites=true&w=majority', {
   useNewUrlParser: true
 });
 
