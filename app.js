@@ -20,9 +20,17 @@ var commentRoutes = require('./routes/comments'),
 /****** DATABASE SETUP ******/
 
 // Creates (and connects to) the yelp_camp database inside mongodb
-mongoose.connect('mongodb://localhost:27017/yelp_camp_dynamic_price', {
+
+/*** Development database ***/
+// mongoose.connect('mongodb://localhost:27017/yelp_camp_dynamic_price', {
+//   useNewUrlParser: true
+// });
+
+/*** Production database ***/
+mongoose.connect('mongodb+srv://bobs:bmubobs17@cluster0-yeyzg.mongodb.net/YelpCamp?retryWrites=true&w=majority', {
   useNewUrlParser: true
 });
+
 // Make Mongoose use MongoDB driver's findOneAndUpdate() function using the useFindAndModify global option.
 mongoose.set('useFindAndModify', false);
 

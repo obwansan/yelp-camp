@@ -22,9 +22,29 @@ To open an instance of the mongo shell, enter the command `mongo` in a new tab.
 ## Starting up the server
 Run `node app.js` or `nodemon` (if you've installed it).
 
+## Set up mongoDB atlas
+https://www.udemy.com/course/the-web-developer-bootcamp/learn/lecture/4474078#questions/6345892
+
+* Create a new project
+* Create a new (free) cluster
+* Connect to it
+  * Username: bobs
+  * Password: bmubobs17
+
 # Heroku
 
 * Email: kob123@hotmail.co.uk
 * Password: yC22$Qdl%WZD
 * Yelp Camp heroku app: https://warm-reaches-48982.herokuapp.com/ | https://git.heroku.com/warm-reaches-48982.git
 * Have to add `"start": "node app.js"` to scripts in package.json
+
+## What happens when you run `git push heroku master`
+* Pushes the code to heroku and runs the code
+* Does an `npm install` to install all packages in package.json
+* Runs the start script, i.e. node app.js
+* That deploys it to the heroku site / URL
+
+## Run commands on heroku server
+* `heroku run <command>`
+* e.g. `heroku run ls node-modules` to list the node modules
+* If mongoose was missing (because we didn't have it in our package.json) we could run `heroku run npm install mongoose --save`
