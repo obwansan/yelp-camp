@@ -20,16 +20,16 @@ var commentRoutes = require('./routes/comments'),
 /****** DATABASE SETUP ******/
 
 // Creates (and connects to) the yelp_camp database inside mongodb
+// process.env.DATABASEURL holds 'mongodb://localhost:27017/yelp_camp_dynamic_price'
+// It's assigned in the CLI like this: export DATABASEURL=mongodb://localhost:27017/yelp_camp_dynamic_price
 
 /*** Development database ***/
-// mongoose.connect('mongodb://localhost:27017/yelp_camp_dynamic_price', {
-//   useNewUrlParser: true
-// });
+mongoose.connect(process.env.DATABASEURL, { useNewUrlParser: true });
 
 /*** Production database ***/
-mongoose.connect('mongodb+srv://bobs:bmubobs17@cluster0-yeyzg.mongodb.net/YelpCamp?retryWrites=true&w=majority', {
-  useNewUrlParser: true
-});
+// mongoose.connect('mongodb+srv://bobs:bmubobs17@cluster0-yeyzg.mongodb.net/YelpCamp?retryWrites=true&w=majority', {
+//   useNewUrlParser: true
+// });
 
 // Make Mongoose use MongoDB driver's findOneAndUpdate() function using the useFindAndModify global option.
 mongoose.set('useFindAndModify', false);
@@ -89,6 +89,7 @@ app.use('/campgrounds/:id/comments', commentRoutes);
 /****** SERVER ******/
 
 // Listens on port 3000. The callback runs when the server is started on port 3000.
+// Heroku uses process.env.PORT so have to provide it.
 var port = process.env.PORT || 3000;
 app.listen(port, function () {
   console.log('The YelpCamp server has started...');
