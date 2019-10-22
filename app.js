@@ -24,9 +24,15 @@ var commentRoutes = require('./routes/comments'),
 // It's assigned in the CLI like this: export DATABASEURL=mongodb://localhost:27017/yelp_camp_dynamic_price
 
 /*** Development database ***/
-mongoose.connect(process.env.DATABASEURL, { useNewUrlParser: true });
+// Best practice to do this in case the env variable was lost or corrupted.
+var url = process.env.DATABASEURL || "mongodb://localhost:27017/yelp_camp_dynamic_price";
+mongoose.connect(url, { useNewUrlParser: true });
 
 /*** Production database ***/
+// Don't use this as I've set process.env.DATABASEURL to be 
+// mongodb+srv://bobs:bmubobs17@cluster0-yeyzg.mongodb.net/YelpCamp?retryWrites=true&w=majority 
+// in my Heroku app (in Config Vars)
+
 // mongoose.connect('mongodb+srv://bobs:bmubobs17@cluster0-yeyzg.mongodb.net/YelpCamp?retryWrites=true&w=majority', {
 //   useNewUrlParser: true
 // });

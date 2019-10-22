@@ -48,3 +48,9 @@ https://www.udemy.com/course/the-web-developer-bootcamp/learn/lecture/4474078#qu
 * `heroku run <command>`
 * e.g. `heroku run ls node-modules` to list the node modules
 * If mongoose was missing (because we didn't have it in our package.json) we could run `heroku run npm install mongoose --save`
+
+# Setting Environment Variables
+* In the CLI run:
+* `export DATABASEURL=mongodb://localhost:27017/yelp_camp_dynamic_price`
+* This just works for the local environment. Have to use Heroku config commands to set production environment variables in Heroku.
+* A bit like adding a new segment to the PATH variable.
